@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" fill="none">
+  <defs>
+    <linearGradient id="bgEv" x1="0" y1="0" x2="800" y2="600" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#F1F5F9"/>
+    </linearGradient>
+    <filter id="shEv" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="4" dy="8" stdDeviation="6" flood-color="#18181B" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+  <rect width="800" height="600" fill="url(#bgEv)"/>
+  <g filter="url(#shEv)" transform="translate(150, 75) rotate(-3)">
+    <rect width="280" height="390" rx="26" fill="#FFFFFF" stroke="#18181B" stroke-width="4"/>
+    <rect x="24" y="24" width="232" height="342" rx="18" stroke="#CBD5E1" stroke-width="2.5"/>
+    <text x="140" y="85" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="12" letter-spacing="3" fill="#475569">CELEBREMOS JUNTOS</text>
+    <text x="140" y="145" text-anchor="middle" font-family="serif" font-weight="900" font-size="34" fill="#18181B">Mis 15 Años</text>
+    <text x="140" y="185" text-anchor="middle" font-family="sans-serif" font-weight="700" font-size="15" fill="#52525B">Bodas · Bautismos · Cumpleaños</text>
+    <circle cx="140" cy="245" r="32" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="2"/>
+    <text x="140" y="253" text-anchor="middle" font-family="sans-serif" font-size="24">🤍</text>
+    <rect x="45" y="305" width="190" height="34" rx="17" fill="#18181B"/>
+    <text x="140" y="327" text-anchor="middle" font-family="sans-serif" font-weight="900" font-size="12" fill="#FFFFFF">DISEÑO A MEDIDA</text>
+  </g>
+  <g filter="url(#shEv)" transform="translate(440, 155) rotate(4)">
+    <rect width="230" height="290" rx="22" fill="#F8FAFC" stroke="#18181B" stroke-width="4"/>
+    <circle cx="115" cy="34" r="12" fill="#E2E8F0" stroke="#18181B" stroke-width="3"/>
+    <text x="115" y="95" text-anchor="middle" font-family="sans-serif" font-weight="900" font-size="18" fill="#18181B">TARJETA SOUVENIR</text>
+    <text x="115" y="128" text-anchor="middle" font-family="sans-serif" font-weight="600" font-size="13" fill="#3F3F46">Gracias por acompañarnos</text>
+    <text x="115" y="150" text-anchor="middle" font-family="sans-serif" font-weight="600" font-size="13" fill="#3F3F46">en esta noche tan especial</text>
+    <rect x="35" y="195" width="160" height="50" rx="12" fill="#FFFFFF" stroke="#18181B" stroke-width="2"/>
+    <text x="115" y="225" text-anchor="middle" font-family="sans-serif" font-weight="900" font-size="13" fill="#18181B">Muestra digital previa</text>
+  </g>
+</svg>

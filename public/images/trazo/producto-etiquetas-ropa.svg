@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" fill="none">
+  <defs>
+    <linearGradient id="bgTag" x1="0" y1="0" x2="800" y2="600" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#F1F5F9"/>
+    </linearGradient>
+    <filter id="shTag" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="5" dy="8" stdDeviation="6" flood-color="#18181B" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+  <rect width="800" height="600" fill="url(#bgTag)"/>
+  <circle cx="150" cy="120" r="130" fill="#E2E8F0" fill-opacity="0.65"/>
+  <!-- Hang tag 1 -->
+  <g filter="url(#shTag)" transform="translate(150, 70) rotate(-6)">
+    <path d="M40 0 H180 L220 45 V390 C220 406 207 420 190 420 H30 C13 420 0 406 0 390 V45 L40 0 Z" fill="#FFFFFF" stroke="#18181B" stroke-width="4"/>
+    <circle cx="110" cy="42" r="16" fill="#F1F5F9" stroke="#18181B" stroke-width="4"/>
+    <circle cx="110" cy="42" r="24" stroke="#64748B" stroke-width="2" stroke-dasharray="4 4"/>
+    <rect x="35" y="95" width="150" height="32" rx="8" fill="#F1F5F9"/>
+    <text x="110" y="116" text-anchor="middle" font-family="sans-serif" font-weight="900" font-size="13" fill="#18181B">CORTE + PERFORACIÓN</text>
+    <text x="110" y="185" text-anchor="middle" font-family="sans-serif" font-weight="900" font-size="28" letter-spacing="4" fill="#18181B">TU MARCA</text>
+    <text x="110" y="212" text-anchor="middle" font-family="sans-serif" font-weight="700" font-size="12" letter-spacing="2" fill="#52525B">INDUMENTARIA &amp; DISEÑO</text>
+    <line x1="40" y1="255" x2="180" y2="255" stroke="#CBD5E1" stroke-width="2" stroke-dasharray="6 6"/>
+    <text x="110" y="295" text-anchor="middle" font-family="sans-serif" font-weight="700" font-size="13" fill="#18181B">TALLE: ______</text>
+    <text x="110" y="330" text-anchor="middle" font-family="sans-serif" font-weight="600" font-size="12" fill="#52525B">@tu.emprendimiento</text>
+    <rect x="45" y="360" width="130" height="28" rx="14" fill="#18181B"/>
+    <text x="110" y="379" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="11" fill="#FFFFFF">CARTULINA</text>
+  </g>
+  <!-- Hang tag 2 -->
+  <g filter="url(#shTag)" transform="translate(420, 105) rotate(5)">
+    <rect width="230" height="380" rx="28" fill="#18181B" stroke="#E2E8F0" stroke-width="4"/>
+    <circle cx="115" cy="42" r="16" fill="#F1F5F9" stroke="#FFFFFF" stroke-width="4"/>
+    <text x="115" y="125" text-anchor="middle" font-family="sans-serif" font-weight="900" font-size="24" letter-spacing="4" fill="#FFFFFF">TRΛZO</text>
+    <text x="115" y="150" text-anchor="middle" font-family="sans-serif" font-weight="700" font-size="11" letter-spacing="3" fill="#E2E8F0">ESPACIO GRÁFICO</text>
+    <rect x="32" y="185" width="166" height="95" rx="14" fill="#27272A" stroke="#3F3F46" stroke-width="2"/>
+    <text x="115" y="220" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="14" fill="#FFFFFF">Listas para colgar</text>
+    <text x="115" y="245" text-anchor="middle" font-family="sans-serif" font-weight="600" font-size="12" fill="#E2E8F0">Entregadas con corte</text>
+    <text x="115" y="265" text-anchor="middle" font-family="sans-serif" font-weight="600" font-size="12" fill="#E2E8F0">y perforación incluidos</text>
+    <rect x="40" y="315" width="150" height="32" rx="16" fill="#FFFFFF"/>
+    <text x="115" y="336" text-anchor="middle" font-family="sans-serif" font-weight="900" font-size="12" fill="#18181B">PERSONALIZAR CON LOGO</text>
+  </g>
+</svg>

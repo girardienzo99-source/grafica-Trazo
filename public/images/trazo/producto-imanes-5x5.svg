@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" fill="none">
+  <defs>
+    <linearGradient id="bgIman" x1="0" y1="0" x2="800" y2="600" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="50%" stop-color="#F8FAFC"/>
+      <stop offset="100%" stop-color="#EEF2F6"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="4" dy="8" stdDeviation="6" flood-color="#18181B" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+  <rect width="800" height="600" fill="url(#bgIman)"/>
+  <circle cx="680" cy="110" r="140" fill="#E2E8F0" fill-opacity="0.65"/>
+  <circle cx="120" cy="500" r="160" fill="#F1F5F9" fill-opacity="0.85"/>
+  <!-- Grid of 5x5 cm Photo Magnets -->
+  <g filter="url(#shadow)" transform="translate(135, 75) rotate(-3)">
+    <rect width="230" height="230" rx="22" fill="#FFFFFF" stroke="#18181B" stroke-width="4"/>
+    <rect x="16" y="16" width="198" height="162" rx="12" fill="#F1F5F9"/>
+    <circle cx="115" cy="82" r="34" fill="#CBD5E1"/>
+    <path d="M65 165 C75 125, 155 125, 165 165" fill="#18181B"/>
+    <text x="115" y="206" text-anchor="middle" font-family="sans-serif" font-weight="900" font-size="16" fill="#18181B">MOMENTOS EN FAMILIA</text>
+    <rect x="145" y="24" width="60" height="22" rx="6" fill="#18181B"/>
+    <text x="175" y="39" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="11" fill="#FFFFFF">5 × 5 cm</text>
+  </g>
+  <g filter="url(#shadow)" transform="translate(415, 65) rotate(2.5)">
+    <rect width="230" height="230" rx="22" fill="#FFFFFF" stroke="#18181B" stroke-width="4"/>
+    <rect x="16" y="16" width="198" height="162" rx="12" fill="#F8FAFC"/>
+    <circle cx="80" cy="65" r="22" fill="#E2E8F0"/>
+    <path d="M25 165 L85 95 L135 145 L165 115 L205 165 Z" fill="#64748B"/>
+    <text x="115" y="206" text-anchor="middle" font-family="sans-serif" font-weight="900" font-size="16" fill="#18181B">TUS VIAJES Y RECUERDOS</text>
+    <rect x="145" y="24" width="60" height="22" rx="6" fill="#18181B"/>
+    <text x="175" y="39" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="11" fill="#FFFFFF">5 × 5 cm</text>
+  </g>
+  <g filter="url(#shadow)" transform="translate(160, 320) rotate(2)">
+    <rect width="220" height="220" rx="22" fill="#FFFFFF" stroke="#18181B" stroke-width="4"/>
+    <rect x="16" y="16" width="188" height="152" rx="12" fill="#F1F5F9"/>
+    <path d="M110 128 C110 128, 68 98, 68 72 C68 56, 82 46, 96 54 C104 59, 110 66, 110 66 C110 66, 116 59, 124 54 C138 46, 152 56, 152 72 C152 98, 110 128, 110 128 Z" fill="#475569"/>
+    <text x="110" y="196" text-anchor="middle" font-family="sans-serif" font-weight="900" font-size="15" fill="#18181B">FECHAS ESPECIALES</text>
+  </g>
+  <!-- Callout card -->
+  <g filter="url(#shadow)" transform="translate(410, 335) rotate(-1.5)">
+    <rect width="265" height="190" rx="24" fill="#18181B" stroke="#E2E8F0" stroke-width="3"/>
+    <rect x="24" y="24" width="145" height="26" rx="13" fill="#FFFFFF"/>
+    <text x="96" y="41" text-anchor="middle" font-family="sans-serif" font-weight="900" font-size="11" fill="#18181B">MEDIDA CONFIRMADA</text>
+    <text x="24" y="88" font-family="sans-serif" font-weight="900" font-size="34" fill="#FFFFFF">5 × 5 cm</text>
+    <text x="24" y="118" font-family="sans-serif" font-weight="600" font-size="14" fill="#E2E8F0">• Subí varias fotos desde el celu</text>
+    <text x="24" y="142" font-family="sans-serif" font-weight="600" font-size="14" fill="#E2E8F0">• Recorte cuadrado 1:1 en vivo</text>
+    <text x="24" y="166" font-family="sans-serif" font-weight="600" font-size="14" fill="#FFFFFF">• Elegí copias por cada foto</text>
+  </g>
+</svg>

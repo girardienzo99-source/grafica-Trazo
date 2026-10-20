@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" fill="none">
+  <defs>
+    <linearGradient id="bgTat" x1="0" y1="0" x2="800" y2="600" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#18181B"/>
+      <stop offset="100%" stop-color="#27272A"/>
+    </linearGradient>
+    <filter id="shTat" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="4" dy="8" stdDeviation="6" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <rect width="800" height="600" fill="url(#bgTat)"/>
+  <circle cx="670" cy="120" r="140" fill="#FFFFFF" fill-opacity="0.08"/>
+  <circle cx="130" cy="480" r="150" fill="#E2E8F0" fill-opacity="0.08"/>
+  <g filter="url(#shTat)" transform="translate(95, 70)">
+    <rect width="610" height="460" rx="32" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="4"/>
+    <rect x="0" y="0" width="610" height="95" rx="28" fill="#F1F5F9"/>
+    <text x="305" y="45" text-anchor="middle" font-family="sans-serif" font-weight="900" font-size="24" letter-spacing="2" fill="#18181B">STAND CREATIVO DE TATUAJES TEMPORALES</text>
+    <text x="305" y="74" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="14" fill="#3F3F46">EXPERIENCIA EN VIVO PARA BODAS · 15 AÑOS · CUMPLEAÑOS · EVENTOS</text>
+    <!-- Tattoo cards -->
+    <g transform="translate(45, 130) rotate(-3)">
+      <rect width="155" height="185" rx="18" fill="#FFFFFF" stroke="#18181B" stroke-width="3"/>
+      <text x="77" y="70" text-anchor="middle" font-family="sans-serif" font-size="36">🤍</text>
+      <text x="77" y="115" text-anchor="middle" font-family="sans-serif" font-weight="900" font-size="14" fill="#18181B">FRASES DE</text>
+      <text x="77" y="135" text-anchor="middle" font-family="sans-serif" font-weight="900" font-size="14" fill="#475569">LOS NOVIOS</text>
+      <text x="77" y="162" text-anchor="middle" font-family="sans-serif" font-weight="700" font-size="11" fill="#52525B">100% Personalizados</text>
+    </g>
+    <g transform="translate(228, 125)">
+      <rect width="155" height="185" rx="18" fill="#F8FAFC" stroke="#18181B" stroke-width="3"/>
+      <text x="77" y="70" text-anchor="middle" font-family="sans-serif" font-size="36">🥂</text>
+      <text x="77" y="115" text-anchor="middle" font-family="sans-serif" font-weight="900" font-size="14" fill="#18181B">ÍCONOS Y</text>
+      <text x="77" y="135" text-anchor="middle" font-family="sans-serif" font-weight="900" font-size="14" fill="#18181B">TEMÁTICA</text>
+      <text x="77" y="162" text-anchor="middle" font-family="sans-serif" font-weight="700" font-size="11" fill="#52525B">Diseñados en Trazo</text>
+    </g>
+    <g transform="translate(410, 130) rotate(3)">
+      <rect width="155" height="185" rx="18" fill="#FFFFFF" stroke="#18181B" stroke-width="3"/>
+      <text x="77" y="70" text-anchor="middle" font-family="sans-serif" font-size="36">✦</text>
+      <text x="77" y="115" text-anchor="middle" font-family="sans-serif" font-weight="900" font-size="14" fill="#18181B">APLICACIÓN</text>
+      <text x="77" y="135" text-anchor="middle" font-family="sans-serif" font-weight="900" font-size="14" fill="#334155">EN SEGUNDOS</text>
+      <text x="77" y="162" text-anchor="middle" font-family="sans-serif" font-weight="700" font-size="11" fill="#52525B">Diversión asegurada</text>
+    </g>
+    <rect x="45" y="345" width="520" height="80" rx="20" fill="#18181B"/>
+    <text x="305" y="380" text-anchor="middle" font-family="sans-serif" font-weight="900" font-size="16" fill="#FFFFFF">CONSULTÁ DISPONIBILIDAD DE FECHA Y PRESUPUESTO A MEDIDA</text>
+    <text x="305" y="405" text-anchor="middle" font-family="sans-serif" font-weight="600" font-size="13" fill="#E2E8F0">Según localidad, tipo de evento y cantidad estimada de invitados</text>
+  </g>
+</svg>

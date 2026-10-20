@@ -1,0 +1,31 @@
+{
+  "name": "trazo-espacio-grafico",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Tienda online personalizada, sistema de pedidos con aprobación de diseño y panel administrador para Trazo Espacio Gráfico (Río Cuarto, Córdoba, Argentina).",
+  "scripts": {
+    "dev": "node --require ./scripts/patch-fs-readlink.cjs ./node_modules/next/dist/bin/next dev",
+    "build": "node --require ./scripts/patch-fs-readlink.cjs ./node_modules/next/dist/bin/next build",
+    "start": "node --require ./scripts/patch-fs-readlink.cjs ./node_modules/next/dist/bin/next start",
+    "lint": "node --require ./scripts/patch-fs-readlink.cjs ./node_modules/next/dist/bin/next lint",
+    "verify": "node scripts/verify-flows.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.475.0",
+    "next": "15.2.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwind-merge": "^3.0.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.9",
+    "@types/node": "^22.13.5",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^4.0.9",
+    "typescript": "^5.8.2"
+  }
+}

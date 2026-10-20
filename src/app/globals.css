@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+:root {
+  /* Sistema de Tokens: Identidad Editorial Contemporánea, Cálida y Artesanal */
+  --bg-ivory: #FAF8F5;
+  --bg-paper: #F4F1EA;
+  --bg-paper-deep: #EBE6DC;
+  --bg-card: #FFFFFF;
+  --text-ink: #1C1917;
+  --text-muted: #57534E;
+  --text-subtle: #78716C;
+  --accent-craft: #44403C;
+  --accent-warm: #292524;
+  --border-warm: #E7E5E4;
+  --border-strong: #D6D3D1;
+  --border-ink: #1C1917;
+  --radius-card: 1.25rem;
+  --shadow-subtle: 0 1px 2px rgba(28, 25, 23, 0.04), 0 8px 24px -8px rgba(28, 25, 23, 0.06);
+  --shadow-elevated: 0 4px 12px rgba(28, 25, 23, 0.06), 0 20px 36px -12px rgba(28, 25, 23, 0.10);
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: var(--bg-ivory);
+  color: var(--text-ink);
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+}
+
+body {
+  background-color: var(--bg-ivory);
+  color: var(--text-ink);
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  font-weight: 400;
+  line-height: 1.6;
+  letter-spacing: -0.005em;
+  overflow-x: hidden;
+}
+
+/* Dos familias tipográficas: Playfair Display para títulos editoriales + Plus Jakarta Sans para interfaz */
+h1,
+h2,
+.font-display {
+  font-family: var(--font-display), Georgia, Cambria, "Times New Roman", serif;
+  letter-spacing: -0.02em;
+}
+
+.font-editorial-italic {
+  font-family: var(--font-display), Georgia, Cambria, "Times New Roman", serif;
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* Superficie de tarjeta limpia y consistente */
+.sticker-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-warm);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-subtle);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.sticker-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-elevated);
+}
+
+/* Marco limpio para fotografías reales */
+.diecut-photo-frame {
+  background-color: #FFFFFF;
+  padding: 6px;
+  border: 1px solid var(--border-warm);
+  box-shadow: var(--shadow-subtle);
+}
+
+.paper-cutout {
+  background-color: var(--bg-paper);
+  border: 1px solid var(--border-strong);
+}
+
+/* Desactivar animaciones continuas innecesarias para proteger rendimiento y lectura */
+.animate-float-slow,
+.animate-float-reverse,
+.animate-ken-burns,
+.animate-marquee,
+.animate-swing-tag,
+.animate-shimmer-sweep,
+.animate-pulse-ring {
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Accesibilidad por teclado clara (WCAG AA) */
+:focus-visible {
+  outline: 2px solid var(--text-ink);
+  outline-offset: 2px;
+}
