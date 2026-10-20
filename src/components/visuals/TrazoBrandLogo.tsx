@@ -1,6 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useRef } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface TrazoBrandLogoProps {
   size?: 'sm' | 'md' | 'lg';
@@ -10,12 +11,18 @@ interface TrazoBrandLogoProps {
 
 /**
  * Marca oficial nítida y consistente de Trazo Espacio Gráfico.
- * Combina isotipo vectorial limpio y logotipo sin duplicar imágenes superpuestas.
+ * Incluye acceso administrativo oculto dentro del logo (doble clic, 3 toques rápidos
+ * o mantener presionado 0.8s) sin exponer enlaces ni textos visibles al público.
  */
 export function TrazoBrandLogo({
   size = 'md',
   variant = 'dark',
 }: TrazoBrandLogoProps) {
+  const router = useRouter();
+  const clickCountRef = useRef(0);
+  const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const isLight = variant === 'light';
   const inkColor = isLight ? '#FAF8F5' : '#1C1917';
   const subColor = isLight ? '#D6D3D1' : '#57534E';
@@ -27,8 +34,55 @@ export function TrazoBrandLogo({
     lg: { box: 'h-11 w-11', title: 'text-xl', sub: 'text-[10px]' },
   }[size];
 
+  const triggerHiddenAdminAccess = (e?: React.SyntheticEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
+    if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
+    clickCountRef.current = 0;
+    router.push('/admin');
+  };
+
+  const handleLogoClick = (e: React.MouseEvent) => {
+    clickCountRef.current += 1;
+    if (clickTimerRef.current) {
+      clearTimeout(clickTimerRef.current);
+    }
+    if (clickCountRef.current >= 3) {
+      triggerHiddenAdminAccess(e);
+      return;
+    }
+    clickTimerRef.current = setTimeout(() => {
+      clickCountRef.current = 0;
+    }, 900);
+  };
+
+  const handlePointerDown = () => {
+    if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
+    longPressTimerRef.current = setTimeout(() => {
+      triggerHiddenAdminAccess();
+    }, 800);
+  };
+
+  const clearLongPress = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  };
+
   return (
-    <div className="inline-flex items-center gap-2.5 select-none">
+    <div
+      onClick={handleLogoClick}
+      onDoubleClick={triggerHiddenAdminAccess}
+      onPointerDown={handlePointerDown}
+      onPointerUp={clearLongPress}
+      onPointerLeave={clearLongPress}
+      onPointerCancel={clearLongPress}
+      className="inline-flex items-center gap-2.5 select-none"
+    >
       <div
         className={`flex ${dimensions.box} shrink-0 items-center justify-center rounded-lg border ${
           isLight

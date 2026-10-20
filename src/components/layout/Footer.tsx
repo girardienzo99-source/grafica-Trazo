@@ -174,16 +174,9 @@ export function Footer() {
           <p>
             © {new Date().getFullYear()} {settings.brand_name} — {settings.city}, {settings.province}, {settings.country}.
           </p>
-          <div className="flex flex-wrap items-center gap-4">
-            <span>Tus fotos y archivos se almacenan de forma privada para tu pedido.</span>
-            <span className="text-[#44403C]">·</span>
-            <Link
-              href="/admin"
-              className="text-[#78716C] transition hover:text-[#D6D3D1]"
-            >
-              Administración
-            </Link>
-          </div>
+          <p>
+            Tus fotos y archivos se almacenan de forma privada para tu pedido.
+          </p>
         </div>
       </div>
     </footer>
