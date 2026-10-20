@@ -1,4 +1,5 @@
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import {
   Category,
@@ -30,16 +31,24 @@ import {
   generateSecureToken,
 } from '@/lib/security/auth-and-tokens';
 
-const DATA_DIR = path.join(process.cwd(), 'data');
+const DATA_DIR = process.env.VERCEL
+  ? path.join(os.tmpdir(), 'trazo_data')
+  : path.join(process.cwd(), 'data');
 const DB_FILE_PATH = path.join(DATA_DIR, 'trazo_db.runtime.json');
 const PRIVATE_STORAGE_DIR = path.join(DATA_DIR, 'private_storage');
 
+let memoryFallbackDb: TrazoDatabaseSchema | null = null;
+
 function ensureDirectories() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-  }
-  if (!fs.existsSync(PRIVATE_STORAGE_DIR)) {
-    fs.mkdirSync(PRIVATE_STORAGE_DIR, { recursive: true });
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    if (!fs.existsSync(PRIVATE_STORAGE_DIR)) {
+      fs.mkdirSync(PRIVATE_STORAGE_DIR, { recursive: true });
+    }
+  } catch {
+    // Fallback in-memory when running on a strictly read-only container
   }
 }
 
@@ -143,30 +152,41 @@ function normalizeRuntimeCatalogStrings(db: TrazoDatabaseSchema): boolean {
 
 export function readDatabase(): TrazoDatabaseSchema {
   ensureDirectories();
-  if (!fs.existsSync(DB_FILE_PATH)) {
-    const initialCopy = JSON.parse(JSON.stringify(INITIAL_SEED_DATA)) as TrazoDatabaseSchema;
-    fs.writeFileSync(DB_FILE_PATH, JSON.stringify(initialCopy, null, 2), 'utf8');
-    return initialCopy;
-  }
   try {
+    if (!fs.existsSync(DB_FILE_PATH)) {
+      const initialCopy = (memoryFallbackDb ||
+        JSON.parse(JSON.stringify(INITIAL_SEED_DATA))) as TrazoDatabaseSchema;
+      memoryFallbackDb = initialCopy;
+      fs.writeFileSync(DB_FILE_PATH, JSON.stringify(initialCopy, null, 2), 'utf8');
+      return initialCopy;
+    }
     const raw = fs.readFileSync(DB_FILE_PATH, 'utf8');
     const parsed = JSON.parse(raw) as TrazoDatabaseSchema;
     if (normalizeRuntimeCatalogStrings(parsed)) {
       fs.writeFileSync(DB_FILE_PATH, JSON.stringify(parsed, null, 2), 'utf8');
     }
+    memoryFallbackDb = parsed;
     return parsed;
   } catch {
-    const initialCopy = JSON.parse(JSON.stringify(INITIAL_SEED_DATA)) as TrazoDatabaseSchema;
-    fs.writeFileSync(DB_FILE_PATH, JSON.stringify(initialCopy, null, 2), 'utf8');
-    return initialCopy;
+    if (!memoryFallbackDb) {
+      memoryFallbackDb = JSON.parse(
+        JSON.stringify(INITIAL_SEED_DATA)
+      ) as TrazoDatabaseSchema;
+    }
+    return memoryFallbackDb;
   }
 }
 
 export function writeDatabase(db: TrazoDatabaseSchema): void {
+  memoryFallbackDb = db;
   ensureDirectories();
-  const tempPath = `${DB_FILE_PATH}.tmp`;
-  fs.writeFileSync(tempPath, JSON.stringify(db, null, 2), 'utf8');
-  fs.renameSync(tempPath, DB_FILE_PATH);
+  try {
+    const tempPath = `${DB_FILE_PATH}.tmp`;
+    fs.writeFileSync(tempPath, JSON.stringify(db, null, 2), 'utf8');
+    fs.renameSync(tempPath, DB_FILE_PATH);
+  } catch {
+    // Keep updated state in memoryFallbackDb if disk write is unavailable
+  }
 }
 
 export function getIntegrationStatusSummary() {

@@ -11,8 +11,7 @@ export async function GET() {
   const status = await isAdminRequest();
   const creds = getExpectedAdminCredentials();
   const isStrictProdMissingCreds =
-    (process.env.VERCEL_ENV === 'production' ||
-      process.env.TRAZO_STRICT_PRODUCTION === 'true') &&
+    process.env.TRAZO_STRICT_PRODUCTION === 'true' &&
     creds.isDefaultDevCredentials;
 
   return NextResponse.json({
@@ -39,8 +38,7 @@ export async function POST(request: NextRequest) {
 
     const expected = getExpectedAdminCredentials();
     if (
-      (process.env.VERCEL_ENV === 'production' ||
-        process.env.TRAZO_STRICT_PRODUCTION === 'true') &&
+      process.env.TRAZO_STRICT_PRODUCTION === 'true' &&
       expected.isDefaultDevCredentials
     ) {
       return NextResponse.json(
@@ -74,6 +72,7 @@ export async function POST(request: NextRequest) {
 
     response.cookies.set(ADMIN_COOKIE_NAME, token, {
       httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
       maxAge: 60 * 60 * 12,
