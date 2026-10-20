@@ -2,6 +2,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import {
+  CashMovement,
   Category,
   DesignRevision,
   Order,
@@ -14,6 +15,7 @@ import {
   ProductionStatus,
   QuoteRequest,
   QuoteStatus,
+  StockMovement,
   StoreSettings,
   TrazoDatabaseSchema,
   CustomizationPayload,
@@ -147,6 +149,27 @@ function normalizeRuntimeCatalogStrings(db: TrazoDatabaseSchema): boolean {
     }
   }
 
+  if (!db.cash_movements) {
+    db.cash_movements = [];
+    mutated = true;
+  }
+  if (!db.stock_movements) {
+    db.stock_movements = [];
+    mutated = true;
+  }
+  if (db.store_settings && !db.store_settings.mercadopago_config) {
+    db.store_settings.mercadopago_config = {
+      is_enabled: true,
+      sandbox_mode: false,
+      public_key: null,
+      access_token: null,
+      webhook_secret: null,
+      account_label: null,
+      updated_at: new Date().toISOString(),
+    };
+    mutated = true;
+  }
+
   return mutated;
 }
 
@@ -189,17 +212,61 @@ export function writeDatabase(db: TrazoDatabaseSchema): void {
   }
 }
 
+export function getEffectiveMercadoPagoCredentials() {
+  const db = readDatabase();
+  const cfg = db.store_settings.mercadopago_config;
+  const accessToken =
+    cfg?.access_token?.trim() || process.env.MP_ACCESS_TOKEN?.trim() || '';
+  const publicKey =
+    cfg?.public_key?.trim() ||
+    process.env.NEXT_PUBLIC_MP_PUBLIC_KEY?.trim() ||
+    '';
+  const webhookSecret =
+    cfg?.webhook_secret?.trim() || process.env.MP_WEBHOOK_SECRET?.trim() || '';
+  return {
+    isEnabled: cfg ? cfg.is_enabled : true,
+    sandboxMode: Boolean(cfg?.sandbox_mode),
+    accessToken,
+    publicKey,
+    webhookSecret,
+    accountLabel: cfg?.account_label || null,
+    configured: accessToken.length > 10,
+    webhookSecretConfigured: webhookSecret.length > 5,
+  };
+}
+
+export function sanitizePublicStoreSettings(
+  settings: StoreSettings
+): StoreSettings {
+  const copy = JSON.parse(JSON.stringify(settings)) as StoreSettings;
+  if (copy.mercadopago_config) {
+    copy.mercadopago_config = {
+      is_enabled: copy.mercadopago_config.is_enabled,
+      sandbox_mode: copy.mercadopago_config.sandbox_mode,
+      public_key: copy.mercadopago_config.public_key,
+      account_label: copy.mercadopago_config.account_label,
+      has_access_token: Boolean(
+        copy.mercadopago_config.access_token &&
+          copy.mercadopago_config.access_token.trim().length > 10
+      ),
+      has_webhook_secret: Boolean(
+        copy.mercadopago_config.webhook_secret &&
+          copy.mercadopago_config.webhook_secret.trim().length > 5
+      ),
+      updated_at: copy.mercadopago_config.updated_at,
+    };
+  }
+  return copy;
+}
+
 export function getIntegrationStatusSummary() {
   const supabaseConfigured = Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
       process.env.SUPABASE_SERVICE_ROLE_KEY
   );
-  const mercadoPagoConfigured = Boolean(
-    process.env.MP_ACCESS_TOKEN && process.env.MP_ACCESS_TOKEN.trim().length > 10
-  );
-  const mercadoPagoWebhookSecretConfigured = Boolean(
-    process.env.MP_WEBHOOK_SECRET && process.env.MP_WEBHOOK_SECRET.trim().length > 5
-  );
+  const mp = getEffectiveMercadoPagoCredentials();
+  const mercadoPagoConfigured = mp.configured;
+  const mercadoPagoWebhookSecretConfigured = mp.webhookSecretConfigured;
   const emailConfigured = Boolean(
     process.env.RESEND_API_KEY && process.env.RESEND_API_KEY.trim().length > 10
   );
@@ -208,27 +275,27 @@ export function getIntegrationStatusSummary() {
     database: {
       activeEngine: supabaseConfigured
         ? 'Supabase PostgreSQL + RLS'
-        : 'Motor Relacional Local Persistente (data/trazo_db.runtime.json) — Migración SQL lista en supabase/migrations/0001_trazo_schema.sql',
+        : 'Motor Relacional Persistente — Migración SQL lista en supabase/migrations/0001_trazo_schema.sql',
       supabaseConfigured,
     },
     privateStorage: {
       activeEngine: supabaseConfigured
         ? 'Supabase Private Storage Bucket'
-        : 'Bóveda Privada Local fuera de /public (data/private_storage) con enlaces HMAC temporales',
+        : 'Bóveda Privada con enlaces HMAC temporales',
       supabaseConfigured,
     },
     mercadoPago: {
       configured: mercadoPagoConfigured,
       webhookSecretConfigured: mercadoPagoWebhookSecretConfigured,
       statusLabel: mercadoPagoConfigured
-        ? 'Credenciales configuradas'
-        : 'Integración server-side e idempotencia operativas — Pendiente cargar MP_ACCESS_TOKEN y MP_WEBHOOK_SECRET del comercio',
+        ? `Cuenta vinculada activa${mp.accountLabel ? ` (${mp.accountLabel})` : ''}`
+        : 'Listo para vincular — Ingresá tu Access Token y Public Key en la pestaña Mercado Pago del panel',
     },
     transactionalEmail: {
       configured: emailConfigured,
       statusLabel: emailConfigured
         ? 'Proveedor Resend activo'
-        : 'Plantillas y disparadores listos — Pendiente cargar RESEND_API_KEY (no simula envíos falsos)',
+        : 'Plantillas listas — Opcional cargar RESEND_API_KEY',
     },
   };
 }
@@ -247,7 +314,7 @@ export function getPublicCatalog() {
   return {
     categories,
     products,
-    settings: db.store_settings,
+    settings: sanitizePublicStoreSettings(db.store_settings),
   };
 }
 
@@ -264,7 +331,11 @@ export function getProductBySlug(slug: string): {
   const category = product
     ? db.categories.find((c) => c.id === product.category_id) || null
     : null;
-  return { product, category, settings: db.store_settings };
+  return {
+    product,
+    category,
+    settings: sanitizePublicStoreSettings(db.store_settings),
+  };
 }
 
 export function setSandboxTestPricesMode(enabled: boolean): StoreSettings {
@@ -301,6 +372,122 @@ export function upsertProductByAdmin(productInput: Product): Product {
   }
   writeDatabase(db);
   return updated;
+}
+
+export function deleteProductByAdmin(productId: string): boolean {
+  const db = readDatabase();
+  const before = db.products.length;
+  db.products = db.products.filter((p) => p.id !== productId);
+  if (db.products.length === before) return false;
+  writeDatabase(db);
+  return true;
+}
+
+export function adjustProductStockByAdmin(params: {
+  productId: string;
+  newStock: number | null;
+  minStockAlert?: number | null;
+  sku?: string | null;
+  reason?: string;
+  adminEmail: string;
+}): Product | null {
+  const db = readDatabase();
+  const product = db.products.find((p) => p.id === params.productId);
+  if (!product) return null;
+
+  const prevStock = product.stock_or_quota;
+  const normalizedNewStock =
+    params.newStock === null || params.newStock === undefined
+      ? null
+      : Math.max(0, Math.round(Number(params.newStock) || 0));
+
+  product.stock_or_quota = normalizedNewStock;
+  if (params.minStockAlert !== undefined) {
+    product.min_stock_alert =
+      params.minStockAlert === null
+        ? null
+        : Math.max(0, Math.round(Number(params.minStockAlert) || 0));
+  }
+  if (params.sku !== undefined) {
+    product.sku = params.sku ? params.sku.trim() : null;
+  }
+  if (normalizedNewStock !== null) {
+    if (normalizedNewStock === 0 && product.availability_status !== 'archived') {
+      product.availability_status = 'out_of_stock';
+    } else if (
+      normalizedNewStock > 0 &&
+      product.availability_status === 'out_of_stock'
+    ) {
+      product.availability_status = 'available';
+    }
+  }
+  product.updated_at = new Date().toISOString();
+
+  if (!db.stock_movements) db.stock_movements = [];
+  db.stock_movements.unshift({
+    id: `stk_${generateSecureToken(8)}`,
+    product_id: product.id,
+    product_name: product.name,
+    delta:
+      normalizedNewStock !== null && prevStock !== null
+        ? normalizedNewStock - prevStock
+        : normalizedNewStock ?? 0,
+    previous_stock: prevStock,
+    new_stock: normalizedNewStock,
+    reason: params.reason?.trim() || 'Ajuste manual en panel de Stock',
+    order_id: null,
+    recorded_by: params.adminEmail,
+    created_at: product.updated_at,
+  });
+
+  writeDatabase(db);
+  return product;
+}
+
+export function addCashMovementByAdmin(params: {
+  type: 'ingreso' | 'egreso';
+  category: CashMovement['category'];
+  payment_method: CashMovement['payment_method'];
+  amount_ars: number;
+  description: string;
+  order_id?: string | null;
+  order_number?: string | null;
+  adminEmail: string;
+}): { success: boolean; error?: string; movement?: CashMovement } {
+  const amount = Math.round(Number(params.amount_ars) || 0);
+  if (amount <= 0) {
+    return {
+      success: false,
+      error: 'Ingresá un monto mayor a $0 ARS para registrar el movimiento en Caja.',
+    };
+  }
+  const db = readDatabase();
+  if (!db.cash_movements) db.cash_movements = [];
+  const movement: CashMovement = {
+    id: `cash_${generateSecureToken(8)}`,
+    type: params.type,
+    category: params.category,
+    payment_method: params.payment_method,
+    amount_ars: amount,
+    description: params.description.trim() || 'Movimiento manual de caja',
+    order_id: params.order_id || null,
+    order_number: params.order_number || null,
+    recorded_by: params.adminEmail,
+    created_at: new Date().toISOString(),
+  };
+  db.cash_movements.unshift(movement);
+  writeDatabase(db);
+  return { success: true, movement };
+}
+
+export function deleteCashMovementByAdmin(movementId: string): boolean {
+  const db = readDatabase();
+  if (!db.cash_movements) return false;
+  const before = db.cash_movements.length;
+  db.cash_movements = db.cash_movements.filter((m) => m.id !== movementId);
+  if (db.cash_movements.length === before) return false;
+  writeDatabase(db);
+  return true;
 }
 
 export function upsertCategoryByAdmin(categoryInput: Category): Category {
@@ -1054,6 +1241,62 @@ export function processVerifiedPaymentNotification(params: {
     order.production_status = order.requires_design_approval
       ? 'en_revision_diseno'
       : 'aprobado_para_producir';
+  }
+
+  // Register cash movement and deduct numeric stock automatically when order is paid
+  if (params.status === 'paid') {
+    if (!Array.isArray(db.cash_movements)) db.cash_movements = [];
+    if (!Array.isArray(db.stock_movements)) db.stock_movements = [];
+
+    const alreadyRecordedCash = db.cash_movements.some(
+      (c) => c.order_id === order.id && c.type === 'ingreso'
+    );
+    if (!alreadyRecordedCash) {
+      db.cash_movements.unshift({
+        id: `cash_${generateSecureToken(8)}`,
+        type: 'ingreso',
+        category: 'venta_online',
+        payment_method:
+          params.provider === 'mercadopago' ? 'mercadopago' : 'transferencia',
+        amount_ars: Math.round(params.amountArs),
+        description: `Cobro Pedido ${order.order_number} (${order.customer_name})`,
+        order_id: order.id,
+        order_number: order.order_number,
+        recorded_by:
+          params.actor === 'admin'
+            ? 'Administración Trazo'
+            : 'Webhook Mercado Pago',
+        created_at: now,
+      });
+    }
+
+    for (const item of order.items) {
+      const product = db.products.find((p) => p.id === item.product_id);
+      if (product && typeof product.stock_or_quota === 'number') {
+        const prevStock = product.stock_or_quota;
+        const nextStock = Math.max(0, prevStock - item.quantity);
+        product.stock_or_quota = nextStock;
+        if (nextStock === 0 && product.availability_status !== 'archived') {
+          product.availability_status = 'out_of_stock';
+        }
+        product.updated_at = now;
+        db.stock_movements.unshift({
+          id: `stk_${generateSecureToken(8)}`,
+          product_id: product.id,
+          product_name: product.name,
+          previous_stock: prevStock,
+          new_stock: nextStock,
+          delta: nextStock - prevStock,
+          reason: `Descuento por venta confirmada (${order.order_number})`,
+          order_id: order.id,
+          recorded_by:
+            params.actor === 'admin'
+              ? 'Administración Trazo'
+              : 'Sistema de Pagos',
+          created_at: now,
+        });
+      }
+    }
   }
 
   order.events.unshift({

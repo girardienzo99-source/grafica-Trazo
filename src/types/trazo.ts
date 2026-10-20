@@ -117,8 +117,17 @@ export interface Product {
   min_quantity: number | null; // null si no hay cantidad mínima oficial confirmada (usa 1 por defecto)
   quantity_multiple: number;
   estimated_production_text: string | null; // null hasta que el administrador configure el plazo real
-  availability_status: 'available' | 'quote_only' | 'out_of_stock' | 'archived';
+  availability_status:
+    | 'available'
+    | 'available_on_order'
+    | 'limited_quota'
+    | 'paused'
+    | 'quote_only'
+    | 'out_of_stock'
+    | 'archived';
   stock_or_quota: number | null;
+  min_stock_alert?: number | null;
+  sku?: string | null;
   is_featured: boolean;
   is_published: boolean;
   customizer_type: CustomizerType;
@@ -409,6 +418,59 @@ export interface DiscountCoupon {
   is_active: boolean;
 }
 
+export type CashMovementCategory =
+  | 'venta_online'
+  | 'venta_mostrador'
+  | 'sena_evento'
+  | 'insumos_papel_iman'
+  | 'gastos_taller'
+  | 'envios_correo'
+  | 'otro';
+
+export type CashPaymentMethod =
+  | 'mercadopago'
+  | 'transferencia'
+  | 'efectivo'
+  | 'otro';
+
+export interface CashMovement {
+  id: string;
+  type: 'ingreso' | 'egreso';
+  category: CashMovementCategory;
+  payment_method: CashPaymentMethod;
+  amount_ars: number;
+  description: string;
+  order_id?: string | null;
+  order_number?: string | null;
+  recorded_by: string;
+  created_at: string;
+}
+
+export interface StockMovement {
+  id: string;
+  product_id: string;
+  product_name: string;
+  delta: number;
+  previous_stock: number | null;
+  new_stock: number | null;
+  reason: string;
+  order_id?: string | null;
+  recorded_by: string;
+  created_at: string;
+}
+
+export interface MercadoPagoStoreConfig {
+  is_enabled: boolean;
+  sandbox_mode: boolean;
+  public_key: string | null;
+  access_token?: string | null;
+  webhook_secret?: string | null;
+  account_label: string | null;
+  has_access_token?: boolean;
+  has_webhook_secret?: boolean;
+  updated_at?: string | null;
+}
+
 export interface StoreSettings {
   id: 'default';
   brand_name: string;
@@ -451,6 +513,7 @@ export interface StoreSettings {
     cuit: string | null;
     instructions: string;
   };
+  mercadopago_config?: MercadoPagoStoreConfig;
   discount_coupons: DiscountCoupon[];
   faqs: FaqItem[];
   gallery_items: GalleryWorkItem[];
@@ -495,5 +558,7 @@ export interface TrazoDatabaseSchema {
   private_files: PrivateFileRecord[];
   orders: Order[];
   quote_requests: QuoteRequest[];
+  cash_movements?: CashMovement[];
+  stock_movements?: StockMovement[];
   store_settings: StoreSettings;
 }

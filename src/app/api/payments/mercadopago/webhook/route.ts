@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
+  getEffectiveMercadoPagoCredentials,
   getOrderByIdForAdmin,
   processVerifiedPaymentNotification,
 } from '@/lib/db/store';
@@ -48,9 +49,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const mpCreds = getEffectiveMercadoPagoCredentials();
     const xSignature = request.headers.get('x-signature');
     const xRequestId = request.headers.get('x-request-id');
-    const webhookSecret = process.env.MP_WEBHOOK_SECRET?.trim() || getAppSecret();
+    const webhookSecret = mpCreds.webhookSecret || getAppSecret();
 
     // 1. Validar firma criptográfica HMAC-SHA256 según documentación oficial de Mercado Pago
     const isSignatureValid = verifyMercadoPagoWebhookSignature({
@@ -70,7 +72,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const mpAccessToken = process.env.MP_ACCESS_TOKEN?.trim();
+    const mpAccessToken = mpCreds.accessToken;
 
     let verifiedExternalReference = '';
     let verifiedAmountArs = 0;

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getOrderByAccessToken } from '@/lib/db/store';
+import {
+  getEffectiveMercadoPagoCredentials,
+  getOrderByAccessToken,
+} from '@/lib/db/store';
 import {
   buildMercadoPagoWebhookSignature,
   getAppSecret,
@@ -33,7 +36,8 @@ export async function POST(request: NextRequest) {
       ''
     );
 
-    const mpAccessToken = process.env.MP_ACCESS_TOKEN?.trim();
+    const mpCreds = getEffectiveMercadoPagoCredentials();
+    const mpAccessToken = mpCreds.accessToken;
 
     // Construir preferencia según documentación oficial de Mercado Pago Checkout Pro
     const preferencePayload = {
@@ -109,7 +113,7 @@ export async function POST(request: NextRequest) {
     const testPaymentId = `mp_test_${order.order_number.replace(/[^A-Z0-9]/gi, '')}`;
     const testRequestId = `req_${order.id}`;
     const testTs = String(Math.floor(Date.now() / 1000));
-    const webhookSecret = process.env.MP_WEBHOOK_SECRET?.trim() || getAppSecret();
+    const webhookSecret = mpCreds.webhookSecret || getAppSecret();
     const testSignature = buildMercadoPagoWebhookSignature(
       testPaymentId,
       testRequestId,
@@ -121,7 +125,7 @@ export async function POST(request: NextRequest) {
       success: true,
       credentialsConfigured: false,
       message:
-        'Integración oficial de Mercado Pago preparada en servidor. Para cobros reales, configurá MP_ACCESS_TOKEN y MP_WEBHOOK_SECRET en las variables de entorno.',
+        'Integración oficial de Mercado Pago preparada en servidor. Podés conectar tu cuenta pegando tu Access Token y Public Key en la pestaña Mercado Pago del Panel Administrador.',
       preferencePayloadPreview: preferencePayload,
       sandboxTestHelper: {
         available: true,

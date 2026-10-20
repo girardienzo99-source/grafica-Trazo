@@ -854,6 +854,8 @@ export const INITIAL_SEED_DATA: TrazoDatabaseSchema = {
   private_files: [],
   orders: [],
   quote_requests: [],
+  cash_movements: [],
+  stock_movements: [],
 
   store_settings: {
     id: 'default',
@@ -938,6 +940,15 @@ export const INITIAL_SEED_DATA: TrazoDatabaseSchema = {
       cuit: null,
       instructions:
         'Te enviaremos los datos bancarios (CBU/CVU y Alias) al confirmar tu pedido. Una vez realizada la transferencia, podés adjuntar el comprobante desde tu enlace de seguimiento.',
+    },
+    mercadopago_config: {
+      is_enabled: true,
+      sandbox_mode: false,
+      public_key: null,
+      access_token: null,
+      webhook_secret: null,
+      account_label: null,
+      updated_at: NOW_ISO,
     },
     discount_coupons: [
       {

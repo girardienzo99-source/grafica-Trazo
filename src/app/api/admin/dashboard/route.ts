@@ -4,9 +4,14 @@ import {
   isAdminRequest,
 } from '@/lib/security/auth-and-tokens';
 import {
+  addCashMovementByAdmin,
   addDesignRevisionByAdmin,
+  adjustProductStockByAdmin,
   computeAdminMetrics,
+  deleteCashMovementByAdmin,
   deletePrivateFileByAdmin,
+  deleteProductByAdmin,
+  getEffectiveMercadoPagoCredentials,
   getIntegrationStatusSummary,
   readDatabase,
   setSandboxTestPricesMode,
@@ -126,6 +131,8 @@ export async function GET(request: NextRequest) {
     orders: db.orders,
     quoteRequests: db.quote_requests,
     storeSettings: db.store_settings,
+    cashMovements: db.cash_movements || [],
+    stockMovements: db.stock_movements || [],
     adminSignedFilesMap,
   });
 }
@@ -146,6 +153,196 @@ export async function POST(request: NextRequest) {
     if (action === 'upsert_product') {
       const product = upsertProductByAdmin(body.product);
       return NextResponse.json({ success: true, product });
+    }
+
+    if (action === 'delete_product') {
+      const deleted = deleteProductByAdmin(String(body.productId || ''));
+      if (!deleted) {
+        return NextResponse.json({ error: 'Producto no encontrado.' }, { status: 404 });
+      }
+      return NextResponse.json({ success: true });
+    }
+
+    if (action === 'adjust_stock') {
+      const product = adjustProductStockByAdmin({
+        productId: String(body.productId || ''),
+        newStock:
+          body.newStock === null || body.newStock === '' || body.newStock === undefined
+            ? null
+            : Number(body.newStock),
+        minStockAlert:
+          body.minStockAlert === null ||
+          body.minStockAlert === '' ||
+          body.minStockAlert === undefined
+            ? null
+            : Number(body.minStockAlert),
+        sku: body.sku !== undefined ? String(body.sku || '') : undefined,
+        reason: body.reason ? String(body.reason) : undefined,
+        adminEmail: adminStatus.email,
+      });
+      if (!product) {
+        return NextResponse.json({ error: 'Producto no encontrado.' }, { status: 404 });
+      }
+      const db = readDatabase();
+      return NextResponse.json({
+        success: true,
+        product,
+        stockMovements: db.stock_movements || [],
+      });
+    }
+
+    if (action === 'add_cash_movement') {
+      const res = addCashMovementByAdmin({
+        type: body.type === 'egreso' ? 'egreso' : 'ingreso',
+        category: body.category || 'otro',
+        payment_method: body.payment_method || 'efectivo',
+        amount_ars: Number(body.amount_ars || 0),
+        description: String(body.description || ''),
+        order_id: body.order_id || null,
+        order_number: body.order_number || null,
+        adminEmail: adminStatus.email,
+      });
+      if (!res.success) {
+        return NextResponse.json({ error: res.error }, { status: 400 });
+      }
+      const db = readDatabase();
+      return NextResponse.json({
+        success: true,
+        movement: res.movement,
+        cashMovements: db.cash_movements || [],
+      });
+    }
+
+    if (action === 'delete_cash_movement') {
+      const deleted = deleteCashMovementByAdmin(String(body.movementId || ''));
+      const db = readDatabase();
+      return NextResponse.json({
+        success: deleted,
+        cashMovements: db.cash_movements || [],
+      });
+    }
+
+    if (action === 'save_mercadopago_config') {
+      const mpConfig = body.mercadopagoConfig || {};
+      const now = new Date().toISOString();
+      const updated = updateStoreSettings((curr) => {
+        const prevMp = curr.mercadopago_config || {
+          is_enabled: false,
+          sandbox_mode: true,
+          public_key: null,
+          access_token: null,
+          webhook_secret: null,
+          account_label: null,
+          updated_at: now,
+        };
+        const nextAccessToken =
+          mpConfig.access_token !== undefined
+            ? String(mpConfig.access_token || '').trim() || null
+            : prevMp.access_token || null;
+        const nextWebhookSecret =
+          mpConfig.webhook_secret !== undefined
+            ? String(mpConfig.webhook_secret || '').trim() || null
+            : prevMp.webhook_secret || null;
+        const nextPublicKey =
+          mpConfig.public_key !== undefined
+            ? String(mpConfig.public_key || '').trim() || null
+            : prevMp.public_key || null;
+
+        return {
+          ...curr,
+          mercadopago_config: {
+            is_enabled:
+              mpConfig.is_enabled !== undefined
+                ? Boolean(mpConfig.is_enabled)
+                : Boolean(nextAccessToken && nextAccessToken.length > 10),
+            sandbox_mode:
+              mpConfig.sandbox_mode !== undefined
+                ? Boolean(mpConfig.sandbox_mode)
+                : Boolean(nextAccessToken?.startsWith('TEST-')),
+            public_key: nextPublicKey,
+            access_token: nextAccessToken,
+            webhook_secret: nextWebhookSecret,
+            account_label:
+              mpConfig.account_label !== undefined
+                ? String(mpConfig.account_label || '').trim() || null
+                : prevMp.account_label || null,
+            has_access_token: Boolean(nextAccessToken && nextAccessToken.length > 10),
+            has_webhook_secret: Boolean(
+              nextWebhookSecret && nextWebhookSecret.length > 5
+            ),
+            updated_at: now,
+          },
+        };
+      });
+
+      return NextResponse.json({
+        success: true,
+        storeSettings: updated,
+        integrations: getIntegrationStatusSummary(),
+      });
+    }
+
+    if (action === 'test_mercadopago_connection') {
+      const providedToken = String(body.accessToken || '').trim();
+      const effective = getEffectiveMercadoPagoCredentials();
+      const tokenToTest = providedToken || effective.accessToken;
+
+      if (!tokenToTest || tokenToTest.length <= 10) {
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              'Pegá primero tu Access Token de Mercado Pago (APP_USR-... o TEST-...) para verificar la conexión.',
+          },
+          { status: 400 }
+        );
+      }
+
+      try {
+        const mpRes = await fetch('https://api.mercadopago.com/users/me', {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${tokenToTest}`,
+          },
+        });
+
+        if (!mpRes.ok) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: `Mercado Pago respondió con estado ${mpRes.status}. Verificá que el Access Token sea válido y pertenezca a tu aplicación en Mercado Pago Developers.`,
+            },
+            { status: 400 }
+          );
+        }
+
+        const mpUser = (await mpRes.json()) as {
+          id?: number;
+          nickname?: string;
+          email?: string;
+          site_id?: string;
+        };
+
+        return NextResponse.json({
+          success: true,
+          message: `Conexión verificada con éxito. Cuenta Mercado Pago: ${mpUser.nickname || mpUser.email || mpUser.id} (${mpUser.site_id || 'MLA'}).`,
+          account: {
+            id: mpUser.id,
+            nickname: mpUser.nickname,
+            email: mpUser.email,
+            siteId: mpUser.site_id,
+          },
+        });
+      } catch {
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              'No se pudo contactar con api.mercadopago.com en este momento. Las credenciales quedaron guardadas en el servidor.',
+          },
+          { status: 502 }
+        );
+      }
     }
 
     if (action === 'upsert_category') {
